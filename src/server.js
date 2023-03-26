@@ -1,7 +1,12 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import user from "./routes/auth.js";
+import authRoute from "./routes/authRoute.js";
+import userRoute from "./routes/userRoute.js";
+import productRoutes from "./routes/productRoute.js";
+import categoryRoute from "./routes/categoryRoute.js";
+import fileUpload from "express-fileupload";
+
 dotenv.config();
 const app = express();
 
@@ -15,13 +20,20 @@ mongoose
   .catch((e) => {
     console.error(`error====>${e}`);
   });
+app.use(
+  fileUpload({
+    useTempFiles: true,
+  })
+);
+app.use("/api/v1/product", productRoutes);
+app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/user", userRoute);
+app.use("/api/v1/category", categoryRoute);
 
-app.use("/api/v1/auth", user);
+// app.get("/", (req, res) => {
+//   res.send("HELLO");
+// });
 
-app.get("/", (req, res) => {
-  res.send("HELLO");
-});
-
-app.listen(5000,'192.168.1.103', () => {
+app.listen(5000, () => {
   console.log("listening at 5000");
 });
