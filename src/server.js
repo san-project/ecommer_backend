@@ -30,10 +30,6 @@ app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/category", categoryRoute);
 
-// app.get("/", (req, res) => {
-//   res.send("HELLO");
-// });
-
-app.listen(5000, () => {
+app.listen(5000, "0.0.0.0", () => {
   console.log("listening at 5000");
 });

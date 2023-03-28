@@ -13,7 +13,8 @@ export const sellerLogin = async (req, res) => {
     }
     const seller = await Seller.findOne({ email });
     if (!seller) {
-      return res.status(40).json({
+      console.log("Not Found");
+      return res.status(401).json({
         status: false,
         message: "User Not Found",
       });
@@ -26,23 +27,30 @@ export const sellerLogin = async (req, res) => {
           "You have not been approved to login, please wait until you will get approved",
       });
     }
-    if (match) {
-      const token = JWT.sign(
-        { _id: seller._id, isApproved: seller.isApproved },
-        process.env.JWT_SECRET,
-        {
-          expiresIn: 60 * 60 * 24 * 30,
-        }
-      );
-      return res.status(200).json({
-        status: true,
-        id: seller._id,
-        name: seller.name,
-        businessName: seller.businessName,
-        token,
+
+    if (!match) {
+      return res.status(401).json({
+        status: false,
+        message: "Invalid Credentials",
       });
     }
+    const token = JWT.sign(
+      { _id: seller._id, isApproved: seller.isApproved },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: 60 * 60 * 24 * 30,
+      }
+    );
+    return res.status(200).json({
+      status: true,
+      id: seller._id,
+      name: seller.name,
+      businessName: seller.businessName,
+      isApproved: seller.isApproved,
+      token,
+    });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       status: false,
       message: "Internal Serval Error",
@@ -52,8 +60,18 @@ export const sellerLogin = async (req, res) => {
 };
 
 export const sellerRegister = async (req, res) => {
-  const { name, email, password, businessName, address, mobile } = req.body;
-  if (!name || !email || !password || !businessName || !address || !mobile) {
+  const { name, email, password, businessName, address, mobile, gstNo } =
+    req.body;
+  console.log(req.body);
+  if (
+    !name ||
+    !email ||
+    !password ||
+    !businessName ||
+    !address ||
+    !mobile ||
+    !gstNo
+  ) {
     return res.status(400).json({
       status: false,
       message: "please enter all fields",
@@ -77,6 +95,7 @@ export const sellerRegister = async (req, res) => {
         address,
         businessName,
         mobile,
+        gstNo,
       });
       await newSeller.save();
       res.status(201).json({

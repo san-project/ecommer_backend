@@ -16,7 +16,7 @@ export const uploadFiles = async (files) => {
       folder: "products",
     });
     console.log(`$urls ====> ${url}`);
-    listOfImages.push(url.url);
+    listOfImages.push({ url: url.url, publicId: url.public_id });
   }
   // await files.map(async (e) => {
   //   const url = await cloudinary.uploader.upload(e.tempFilePath, {

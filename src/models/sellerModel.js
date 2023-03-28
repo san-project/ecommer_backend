@@ -20,6 +20,11 @@ const SellerSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    gstNo: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     password: {
       type: String,
       required: true,
