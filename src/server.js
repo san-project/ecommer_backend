@@ -25,12 +25,15 @@ app.use(
     useTempFiles: true,
   })
 );
+
+const hostName = "0.0.0.0";
+
 app.use("/api/v1/product", productRoutes);
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/category", categoryRoute);
 
-app.listen(process.env.PORT || 5000, () => {
+app.listen(process.env.PORT || 5000, hostName, () => {
   console.log(process.env.TEST);
   console.log("listening at 5000");
 });

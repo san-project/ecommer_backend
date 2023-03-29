@@ -17,33 +17,33 @@ router.get("/get", async (req, res) => {
     message: "laksdcn",
   });
 });
-router.post("/upload", async (req, res, next) => {
-  const files = req.files.images;
-  // console.log(files);
-  const url = await uploadFiles(files);
-  console.log(`$urls in route====> ${url}`);
-  res.json({
-    ...url,
-  });
-});
-router.get("/", async (req, res) => {
-  try {
-    const products = await Product.find()
-      .populate("category")
-      .populate("seller");
-    console.log(products);
-    res.status(200).json({
-      success: true,
-      products,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: false,
-      message: "Internal Serval Error",
-      description: error,
-    });
-  }
-});
+// router.post("/", async (req, res, next) => {
+//   const files = req.files.images;
+//   // console.log(files);
+//   const url = await uploadFiles(files);
+//   console.log(`$urls in route====> ${url}`);
+//   res.json({
+//     ...url,
+//   });
+// });
+// router.get("/", async (req, res) => {
+//   try {
+//     const products = await Product.find()
+//       .populate("category")
+//       .populate("seller");
+//     console.log(products);
+//     res.status(200).json({
+//       success: true,
+//       products,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       status: false,
+//       message: "Internal Serval Error",
+//       description: error,
+//     });
+//   }
+// });
 
 router.post("/", verifySeller, async (req, res) => {
   const { name, description, categoryId, brand, price, countInStock } =

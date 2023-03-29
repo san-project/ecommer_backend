@@ -60,36 +60,39 @@ export const userLogin = async (req, res) => {
     } else {
       const user = await User.findOne({ email });
       if (!user) {
-        return res
-          .json({ message: "cannot find the user with the provided email" })
-          .status(400);
+        return res.status(400).json({
+          status: false,
+          message: "Can not find user with provided email",
+        });
       }
       const match = await comparePassword(password, user.password);
-      if (match) {
-        const token = JWT.sign({ id: user._id }, process.env.JWT_SECRET, {
-          // expiresIn: 30,
+      if (!match) {
+        return res.status(401).json({
+          status: false,
+          message: "Invalid Credentials",
         });
-        return res
-          .json({
-            status: true,
-            message: "login successfully",
-            user: {
-              _id: user._id,
-              token: token,
-              name: user.name,
-              email: user.email,
-              phone: user.phone,
-              address: user.address,
-            },
-          })
-          .status(200);
-      } else {
-        return res
-          .json({ status: false, message: "user not found" })
-          .status(401);
       }
+
+      const token = JWT.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "30d",
+      });
+      return res.status(200).json({
+        status: true,
+        message: "login successfully",
+        user: {
+          _id: user._id,
+          token: token,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          address: user.address,
+        },
+      });
     }
   } catch (error) {
     console.log(error);
+    return res
+      .status(500)
+      .json({ status: false, message: "Internal Server Error" });
   }
 };
