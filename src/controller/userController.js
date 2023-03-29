@@ -84,7 +84,9 @@ export const userLogin = async (req, res) => {
           })
           .status(200);
       } else {
-        return res.json({ message: "user not found" }).status(200);
+        return res
+          .json({ status: false, message: "user not found" })
+          .status(401);
       }
     }
   } catch (error) {
