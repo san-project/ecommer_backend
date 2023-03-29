@@ -30,6 +30,7 @@ app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/category", categoryRoute);
 
-app.listen(5000, "0.0.0.0", () => {
+app.listen(process.env.PORT || 5000, () => {
+  console.log(process.env.TEST);
   console.log("listening at 5000");
 });

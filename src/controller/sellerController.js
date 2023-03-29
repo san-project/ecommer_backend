@@ -47,7 +47,7 @@ export const sellerLogin = async (req, res) => {
       name: seller.name,
       businessName: seller.businessName,
       isApproved: seller.isApproved,
-      token,
+      token: token,
     });
   } catch (error) {
     console.log(error);
