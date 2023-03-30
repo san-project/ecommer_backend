@@ -3,7 +3,7 @@ import { verifySeller } from "../middleware/authMiddleware.js";
 import Category from "../models/category.js";
 const router = express.Router();
 
-router.get("/", verifySeller, async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const allCategories = await Category.find();
     res.status(200).json(allCategories);

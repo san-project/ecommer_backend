@@ -23,6 +23,7 @@ const productSchema = new mongoose.Schema(
     category: { type: mongoose.Schema.Types.ObjectId, ref: "Category" },
     brand: { type: String, required: true },
     images: { type: [], required: true },
+    thumbnail: { type: {}, required: true },
     price: { type: Number, default: 0.0, required: true },
     countInStock: { type: Number, default: 0, required: true },
     rating: { type: Number, default: 0.0, required: true },

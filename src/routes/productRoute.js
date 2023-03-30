@@ -2,6 +2,7 @@ import express from "express";
 import Product from "../models/productModel.js";
 import { verifySeller } from "../middleware/authMiddleware.js";
 import { uploadFiles } from "../helpers/cloudinaryConfig.js";
+import { v2 as cloudinary } from "cloudinary";
 const router = express.Router();
 
 router.get("/get", async (req, res) => {
@@ -48,7 +49,10 @@ router.get("/get", async (req, res) => {
 router.post("/", verifySeller, async (req, res) => {
   const { name, description, categoryId, brand, price, countInStock } =
     req.body;
+  console.log(req.body);
+  console.log(req.files);
   const images = req.files.images;
+  const thumbnail = req.files.thumbnail;
   if (
     !name ||
     !description ||
@@ -56,7 +60,8 @@ router.post("/", verifySeller, async (req, res) => {
     !brand ||
     !price ||
     !countInStock ||
-    !images
+    !images ||
+    !thumbnail
   ) {
     return res.status(400).json({
       message: "fill all the fields",
@@ -64,6 +69,12 @@ router.post("/", verifySeller, async (req, res) => {
   }
   try {
     const url = await uploadFiles(images);
+    const thumbnailUrl = await cloudinary.uploader.upload(
+      thumbnail.tempFilePath,
+      {
+        folder: "products",
+      }
+    );
     const newProduct = new Product({
       name,
       description,
@@ -73,6 +84,10 @@ router.post("/", verifySeller, async (req, res) => {
       countInStock,
       images: url,
       seller: req.seller._id,
+      thumbnail: {
+        url: thumbnailUrl.url,
+        public_id: thumbnailUrl.public_id,
+      },
     });
     const savedProduct = await newProduct.save();
     return res.status(200).json({
@@ -81,6 +96,7 @@ router.post("/", verifySeller, async (req, res) => {
       savedProduct,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       status: false,
       message: "Internal Serval Error",
