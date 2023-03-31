@@ -14,9 +14,6 @@ router.get("/get", async (req, res) => {
   }
   try {
   } catch (error) {}
-  res.json({
-    message: "laksdcn",
-  });
 });
 // router.post("/", async (req, res, next) => {
 //   const files = req.files.images;
@@ -27,24 +24,49 @@ router.get("/get", async (req, res) => {
 //     ...url,
 //   });
 // });
-// router.get("/", async (req, res) => {
-//   try {
-//     const products = await Product.find()
-//       .populate("category")
-//       .populate("seller");
-//     console.log(products);
-//     res.status(200).json({
-//       success: true,
-//       products,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       status: false,
-//       message: "Internal Serval Error",
-//       description: error,
-//     });
-//   }
-// });
+router.get("/", async (req, res) => {
+  try {
+    const products = await Product.find()
+      .populate("category")
+      .populate("seller", "businessName,");
+    console.log(products);
+    res.status(200).json({
+      success: true,
+      products,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: "Internal Serval Error",
+      description: error,
+    });
+  }
+});
+
+router.get("/sellerProducts", async (req, res) => {
+  try {
+    const sellerId = req.query.sellerId;
+
+    if (!sellerId) {
+      return res.status(401).json({
+        status: false,
+        message: "please enter seller id",
+      });
+    }
+    const sellerProducts = await Product.find({
+      seller: sellerId,
+    });
+    res.status(200).json({
+      status: true,
+      products: sellerProducts,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal Server Error",
+    });
+  }
+});
 
 router.post("/", verifySeller, async (req, res) => {
   const { name, description, categoryId, brand, price, countInStock } =
@@ -86,7 +108,7 @@ router.post("/", verifySeller, async (req, res) => {
       seller: req.seller._id,
       thumbnail: {
         url: thumbnailUrl.url,
-        public_id: thumbnailUrl.public_id,
+        publicId: thumbnailUrl.public_id,
       },
     });
     const savedProduct = await newProduct.save();
