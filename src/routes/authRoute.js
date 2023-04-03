@@ -1,7 +1,13 @@
 import express from "express";
 
-import { sellerLogin, sellerRegister } from "../controller/sellerController.js";
-import { userLogin, userRegister } from "../controller/userController.js";
+import {
+  sellerLogin,
+  sellerRegister,
+} from "../controller/authControllers/sellerController.js";
+import {
+  userLogin,
+  userRegister,
+} from "../controller/authControllers/userController.js";
 const router = express.Router();
 
 //seller

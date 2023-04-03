@@ -1,5 +1,5 @@
-import { comparePassword, hashPassword } from "../helpers/authHelper.js";
-import Seller from "../models/sellerModel.js";
+import { comparePassword, hashPassword } from "../../helpers/authHelper.js";
+import Seller from "../../models/sellerModel.js";
 import JWT from "jsonwebtoken";
 
 export const sellerLogin = async (req, res) => {

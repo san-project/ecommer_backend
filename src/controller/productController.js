@@ -1,53 +1,8 @@
-import express from "express";
 import Product from "../models/productModel.js";
-import { verifySeller } from "../middleware/authMiddleware.js";
-import {
-  getAllProducts,
-  getProductsOfSeller,
-  getSingleProduct,
-  uploadProduct,
-} from "../controller/productController.js";
-const router = express.Router();
-
-// router.get("/get", async (req, res) => {
-//   const { id } = req.query;
-//   if (!id) {
-//     return res.status(401).json({
-//       message: "pass product id in params",
-//     });
-//   }
-//   try {
-//   } catch (error) {}
-// });
-// router.post("/", async (req, res, next) => {
-//   const files = req.files.images;
-//   // console.log(files);
-//   const url = await uploadFiles(files);
-//   console.log(`$urls in route====> ${url}`);
-//   res.json({
-//     ...url,
-//   });
-// });
-
-router.get("/sellerProducts", getProductsOfSeller);
-router.get("/:id", getSingleProduct);
-
-router.get("/", getAllProducts);
-
-router.post("/", verifySeller, uploadProduct);
-
-export default router;
-
-/*
-
-import express from "express";
-import Product from "../models/productModel.js";
-import { verifySeller } from "../middleware/authMiddleware.js";
 import { uploadFiles } from "../helpers/cloudinaryConfig.js";
 import { v2 as cloudinary } from "cloudinary";
-const router = express.Router();
 
-router.get("/:id", async (req, res) => {
+export const getSingleProduct = async (req, res) => {
   const { id } = req.params;
   if (!id) {
     return res.status(401).json({
@@ -69,65 +24,35 @@ router.get("/:id", async (req, res) => {
       description: error,
     });
   }
-});
-// router.post("/", async (req, res, next) => {
-//   const files = req.files.images;
-//   // console.log(files);
-//   const url = await uploadFiles(files);
-//   console.log(`$urls in route====> ${url}`);
-//   res.json({
-//     ...url,
-//   });
-// });
+};
 
-router.get("/category/:id", async (req, res) => {
-  const id = req.params;
-  if (!id) {
-    return res.status(401).json({
-      status: false,
-      message: "enter category id",
-    });
-  }
-  try {
-    const products = await Product.find({ category: id })
-      .populate("category")
-      .populate("seller", "businessName");
-    return res.status(200).json({
-      status: true,
-      products,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: "Internal Serval Error",
-      description: error,
-    });
-  }
-});
+export const getAllProducts = async (req, res) => {
+  console.log("all products");
 
-router.get("/", async (req, res) => {
   try {
     const products = await Product.find()
       .populate("category")
       .populate("seller", "businessName");
     console.log(products);
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       products,
     });
   } catch (error) {
-    return res.status(500).json({
+    console.log(error);
+    res.status(500).json({
       status: false,
       message: "Internal Serval Error",
       description: error,
     });
   }
-});
+};
 
-router.get("/sellerProducts", async (req, res) => {
+export const getProductsOfSeller = async (req, res) => {
+  console.log("products of seller");
   try {
     const sellerId = req.query.sellerId;
-
+    console.log(`sellerId => ${sellerId}`);
     if (!sellerId) {
       return res.status(401).json({
         status: false,
@@ -137,21 +62,21 @@ router.get("/sellerProducts", async (req, res) => {
     const sellerProducts = await Product.find({
       seller: sellerId,
     });
-    console.log(sellerProducts);
     res.status(200).json({
       status: true,
       products: sellerProducts,
     });
   } catch (error) {
-    console.log(error);
+    console.log(`error => ${error}`);
+
     return res.status(500).json({
       status: false,
       message: "Internal Server Error",
     });
   }
-});
+};
 
-router.post("/", verifySeller, async (req, res) => {
+export const uploadProduct = async (req, res) => {
   const { name, description, categoryId, brand, price, countInStock } =
     req.body;
   console.log(req.body);
@@ -202,15 +127,10 @@ router.post("/", verifySeller, async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
+    res.status(500).json({
       status: false,
       message: "Internal Serval Error",
       description: error,
     });
   }
-});
-
-export default router;
-
-
-*/
+};
