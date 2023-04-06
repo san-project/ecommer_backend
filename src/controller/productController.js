@@ -1,7 +1,8 @@
 import Product from "../models/productModel.js";
 import { uploadFiles } from "../helpers/cloudinaryConfig.js";
 import { v2 as cloudinary } from "cloudinary";
-
+import Wishlist from "../models/wishlistModel.js";
+import JWT from "jsonwebtoken";
 export const getSingleProduct = async (req, res) => {
   const { id } = req.params;
   if (!id) {
@@ -28,8 +29,34 @@ export const getSingleProduct = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
   console.log("all products");
+  const authHeader = req.headers.authorization;
 
   try {
+    if (authHeader) {
+      const token = authHeader.split(" ")[1];
+      const decode = JWT.verify(token, process.env.JWT_SECRET);
+      const userId = decode.id;
+      const products = await Product.find()
+        .populate("category")
+        .populate("seller", "businessName");
+      const wishlist = await Wishlist.findOne({ userId }).populate("products");
+
+      // iterate over the products and check if each product is in the wishlist
+      const result = products.map((product) => {
+        const inWishlist = wishlist.products.some(
+          (wishlistProduct) =>
+            wishlistProduct._id.toString() === product._id.toString()
+        );
+        return {
+          ...product.toObject(),
+          inWishlist,
+        };
+      });
+      return res.status(200).json({
+        success: true,
+        products: result,
+      });
+    }
     const products = await Product.find()
       .populate("category")
       .populate("seller", "businessName");

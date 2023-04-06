@@ -8,7 +8,7 @@ import authRoute from "./routes/authRoute.js";
 import userRoute from "./routes/userRoute.js";
 import productRoutes from "./routes/productRoute.js";
 import categoryRoute from "./routes/categoryRoute.js";
-import wishlistRoute from "./routes/wishListProduct.js";
+import wishlistRoute from "./routes/wishListRoute.js";
 
 dotenv.config();
 const app = express();
