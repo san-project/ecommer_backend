@@ -35,7 +35,9 @@ export const sellerLogin = async (req, res) => {
       });
     }
     const token = JWT.sign(
-      { _id: seller._id, isApproved: seller.isApproved },
+      {
+        _id: seller._id,
+      },
       process.env.JWT_SECRET,
       {
         expiresIn: 60 * 60 * 24 * 30,
@@ -47,6 +49,7 @@ export const sellerLogin = async (req, res) => {
       name: seller.name,
       businessName: seller.businessName,
       isApproved: seller.isApproved,
+      isAdmin: seller.isAdmin,
       token: token,
     });
   } catch (error) {
@@ -98,6 +101,15 @@ export const sellerRegister = async (req, res) => {
         gstNo,
       });
       await newSeller.save();
+      const token = JWT.sign(
+        {
+          _id: newSeller._id,
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: 60 * 60 * 24 * 30,
+        }
+      );
       res.status(201).json({
         status: true,
         message:
