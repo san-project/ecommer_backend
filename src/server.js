@@ -10,6 +10,8 @@ import productRoutes from "./routes/productRoute.js";
 import categoryRoute from "./routes/categoryRoute.js";
 import wishlistRoute from "./routes/wishListRoute.js";
 import sellerRoutes from "./routes/sellerRoutes.js";
+import cartRoutes from "./routes/cartRoute.js";
+import adminRoutes from "./routes/adminRoute.js";
 
 dotenv.config();
 const app = express();
@@ -39,6 +41,8 @@ app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/category", categoryRoute);
 app.use("/api/v1/seller", sellerRoutes);
+app.use("/api/v1/cart", cartRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 app.use("*", (req, res) => {
   res.status(404).json({

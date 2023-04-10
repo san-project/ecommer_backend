@@ -30,7 +30,7 @@ export const getSingleProduct = async (req, res) => {
 export const getAllProducts = async (req, res) => {
   console.log("all products");
   const authHeader = req.headers.authorization;
-
+  console.log(`header==============================${authHeader}`);
   try {
     if (authHeader) {
       const token = authHeader.split(" ")[1];
@@ -40,7 +40,6 @@ export const getAllProducts = async (req, res) => {
         .populate("category")
         .populate("seller", "businessName");
       const wishlist = await Wishlist.findOne({ userId }).populate("products");
-
       // iterate over the products and check if each product is in the wishlist
       const result = products.map((product) => {
         const inWishlist = wishlist.products.some(
@@ -69,7 +68,7 @@ export const getAllProducts = async (req, res) => {
     console.log(error);
     res.status(500).json({
       status: false,
-      message: "Internal Serval Error",
+      message: "Internal Serval Error, cannot get products",
       description: error,
     });
   }

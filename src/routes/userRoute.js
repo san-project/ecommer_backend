@@ -3,7 +3,7 @@ import { verifyToken } from "../middleware/authMiddleware.js";
 import userModel from "../models/userModel.js";
 const router = express.Router();
 
-router.put("/:id", verifyToken, async (req, res, next) => {
+router.put("/:id", verifyToken, async (req, res) => {
   if (req.user.id != req.params.id) {
     return res.status(403).json({
       message: "You are not authorized to perform this action",

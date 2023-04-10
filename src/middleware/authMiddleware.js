@@ -1,5 +1,6 @@
 import JWT from "jsonwebtoken";
 import Seller from "../models/sellerModel.js";
+import userModel from "../models/userModel.js";
 
 const requireSignIn = async (req, res, next) => {
   try {
@@ -24,7 +25,8 @@ export const verifyToken = async (req, res, next) => {
     const token = authHeader.split(" ")[1];
     const decode = JWT.verify(token, process.env.JWT_SECRET);
     console.log(decode);
-    req.user = decode;
+    const user = await userModel.findById(decode.id);
+    req.user = user;
     next();
   } catch (error) {
     console.log(error);
@@ -48,7 +50,7 @@ export const verifySeller = async (req, res, next) => {
     const id = decode._id;
     const seller = await Seller.findById(id);
     if (seller.isApproved === true) {
-      req.seller = decode;
+      req.seller = seller;
       next();
     } else {
       return res.status(401).json({

@@ -21,7 +21,7 @@ router.get("/not-verified", async (req, res) => {
   res.json(sellers);
 });
 
-router.put("/approve/:id", async (req, res) => {
+router.put("/approve/:id", verifyAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const seller = await Seller.findByIdAndUpdate(id, { isApproved: true });

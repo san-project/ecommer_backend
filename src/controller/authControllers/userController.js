@@ -1,6 +1,7 @@
 import { comparePassword, hashPassword } from "../../helpers/authHelper.js";
 import User from "../../models/userModel.js";
 import JWT from "jsonwebtoken";
+import Wishlist from "../../models/wishlistModel.js";
 
 export const userRegister = async (req, res) => {
   const { name, email, password } = req.body;
@@ -15,6 +16,7 @@ export const userRegister = async (req, res) => {
   }
 
   const existingUser = await User.findOne({ email });
+
   if (existingUser) {
     return res
       .json({ message: "User already registered with this email" })
@@ -29,9 +31,13 @@ export const userRegister = async (req, res) => {
   });
   try {
     const savedUser = await user.save();
+    await Wishlist({
+      userId: savedUser._id,
+      products: [],
+    }).save();
     console.log(savedUser);
-    const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: 30,
+    const token = JWT.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "30d",
     });
     return res
       .json({
