@@ -74,6 +74,33 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
+export const getProductsOfCategory = async (req, res) => {
+  try {
+    const categoryId = req.query.categoryId;
+    // console.log(`sellerId => ${sellerId}`);
+    if (!categoryId) {
+      return res.status(401).json({
+        status: false,
+        message: "please enter categoryId",
+      });
+    }
+    const categoryProducts = await Product.find({
+      category: categoryId,
+    })
+      .populate("category")
+      .populate("seller", "businessName");
+    res.status(200).json({
+      status: true,
+      products: categoryProducts,
+    });
+  } catch (error) {
+    console.log(`error => ${error}`);
+    return res.status(500).json({
+      status: false,
+      message: "Internal Server Error",
+    });
+  }
+};
 export const getProductsOfSeller = async (req, res) => {
   console.log("products of seller");
   try {
@@ -87,7 +114,9 @@ export const getProductsOfSeller = async (req, res) => {
     }
     const sellerProducts = await Product.find({
       seller: sellerId,
-    });
+    })
+      .populate("category")
+      .populate("seller", "businessName");
     res.status(200).json({
       status: true,
       products: sellerProducts,
