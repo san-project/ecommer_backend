@@ -5,9 +5,9 @@ const router = express.Router();
 
 router.get("/", verifyToken, async (req, res) => {
   try {
-    console.log(req.user.id);
+    console.log(req.user._id);
     const wishListProducts = await Wishlist.findOne({
-      userId: req.user.id,
+      userId: req.user._id,
     }).populate({
       path: "products",
       populate: [
@@ -38,7 +38,7 @@ router.get("/", verifyToken, async (req, res) => {
 router.post("/", verifyToken, async (req, res) => {
   try {
     const { productId } = req.body;
-    const userId = req.user.id;
+    const userId = req.user._id;
     const wishlist = await Wishlist.findOneAndUpdate(
       { userId: userId },
       { $addToSet: { products: productId } },
@@ -59,7 +59,7 @@ router.delete("/", verifyToken, async (req, res) => {
   console.log(
     "=====================deleting products========================="
   );
-  const userId = req.user.id;
+  const userId = req.user._id;
   const productId = req.body.productId;
   if (!productId) {
     return res.status(400).json({

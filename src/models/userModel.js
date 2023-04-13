@@ -2,6 +2,9 @@ import { mongoose } from "mongoose";
 
 const UserSchema = new mongoose.Schema(
   {
+    profile: {
+      type: {},
+    },
     name: {
       type: String,
       required: true,
