@@ -3,6 +3,44 @@ import { uploadFiles } from "../helpers/cloudinaryConfig.js";
 import { v2 as cloudinary } from "cloudinary";
 import Wishlist from "../models/wishlistModel.js";
 import JWT from "jsonwebtoken";
+
+export const getProductsFromQuery = async (req, res) => {
+  try {
+    const query = req.query.q; // Get the search query from the URL query string
+    const regex = new RegExp(query, "i"); // Create a case-insensitive regular expression from the query
+    const products = await Product.find({
+      $or: [{ name: regex }, { description: regex }],
+    })
+      .populate("category")
+      .populate("seller", "businessName"); // Search for products that match the regular expression
+    res.json({ products: products }); // Return the matching products as JSON
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal Serval Error",
+      description: error,
+    });
+  }
+};
+export const getProductsFromFilter = async (req, res) => {
+  try {
+    const query = req.query.q; // Get the search query from the URL query string
+    const regex = new RegExp(query, "i"); // Create a case-insensitive regular expression from the query
+    const products = await Product.find({
+      $or: [{ name: regex }, { description: regex }],
+    }); // Search for products that match the regular expression
+    res.json(products); // Return the matching products as JSON
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal Serval Error",
+      description: error,
+    });
+  }
+};
+
 export const getSingleProduct = async (req, res) => {
   const { id } = req.params;
   if (!id) {
