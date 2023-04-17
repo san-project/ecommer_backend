@@ -26,7 +26,7 @@ const orderSchema = new mongoose.Schema(
     },
     buyer: {
       type: mongoose.ObjectId,
-      ref: "users",
+      ref: "User",
     },
     totalPrice: {
       type: Number,
