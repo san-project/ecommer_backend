@@ -21,7 +21,7 @@ export const sellerLogin = async (req, res) => {
     }
     const match = await comparePassword(password, seller.password);
     if (!seller.isApproved) {
-      return res.status(401).json({
+      return res.status(403).json({
         status: false,
         message:
           "You have not been approved to login, please wait until you will get approved",

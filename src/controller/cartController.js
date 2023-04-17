@@ -1,4 +1,5 @@
 import CartModel from "../models/cartModel.js";
+import ProductModel from "../models/productModel.js";
 
 export const createCartController = async (req, res) => {
   try {
@@ -13,7 +14,21 @@ export const createCartController = async (req, res) => {
     console.log(`productId===> ${product}`);
     const user = req.user._id;
     console.log(`userID===> ${user}`);
+    const selectedProduct = await ProductModel.findById(product);
     const existingCart = await CartModel.find({ product, user });
+    const carts = await CartModel.find({ user });
+    if (carts.length >= 1) {
+      for (const cart of carts) {
+        const savedProduct = await ProductModel.findById(cart.product);
+        if (!savedProduct.seller.equals(selectedProduct.seller)) {
+          console.log("selectedProductId", selectedProduct.seller);
+          console.log("savedProduct", savedProduct.seller);
+          return res.json({
+            message: "You need to selected product of same seller",
+          });
+        }
+      }
+    }
     console.log(existingCart);
     if (existingCart.length) {
       return res.status(200).send({

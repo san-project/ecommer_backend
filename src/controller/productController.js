@@ -3,6 +3,8 @@ import { uploadFiles } from "../helpers/cloudinaryConfig.js";
 import { v2 as cloudinary } from "cloudinary";
 import Wishlist from "../models/wishlistModel.js";
 import JWT from "jsonwebtoken";
+import orderModel from "../models/orderModel.js";
+import cartModel from "../models/cartModel.js";
 
 export const getProductsFromQuery = async (req, res) => {
   try {
@@ -218,6 +220,51 @@ export const uploadProduct = async (req, res) => {
       message: "you have added new product successfully",
       savedProduct,
     });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: false,
+      message: "Internal Serval Error",
+      description: error,
+    });
+  }
+};
+
+export const sendOrder = async (req, res) => {
+  const { deliveryAddress } = req.body;
+  if (!deliveryAddress) {
+    return res.status(400).json({
+      message: "fill all the fields",
+    });
+  }
+  try {
+    console.log(`userId===========> ${req.user._id}`);
+    const foundCarts = await cartModel
+      .find({ user: req.user._id })
+      .populate("product");
+    let totalPrice = 0;
+
+    const products = foundCarts.map((cart) => {
+      totalPrice += cart.product.price * cart.quantity;
+      return {
+        product: cart.product,
+        quantity: cart.quantity,
+      };
+    });
+    const firstProduct = await Product.findById(products[0].product);
+    const order = new orderModel({
+      products,
+      deliveryAddress,
+      buyer: req.user._id,
+      seller: firstProduct.seller,
+      totalPrice,
+    });
+    await order.save();
+    await cartModel.deleteMany({ user: req.user._id });
+    res.json({
+      order,
+    });
+    console.log("deleted suncaklsdnf");
   } catch (error) {
     console.log(error);
     res.status(500).json({
