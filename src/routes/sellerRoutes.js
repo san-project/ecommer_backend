@@ -7,6 +7,24 @@ router.get("/", verifyAdmin, async (req, res) => {
   const sellers = await Seller.find({ isAdmin: false });
   res.json(sellers);
 });
+router.get("/dashboard", verifySeller, async (req, res) => {
+  const orders = await orderModel.find({
+    seller: req.seller._id,
+  });
+  const allOrders = orders.length;
+
+  const deliveredOrders = orders.filter((item) => {
+    return item.status == "Delivered";
+  }).length;
+  const notProcessedOrders = orders.map((item) => {
+    return item.status == "Not Process";
+  }).length;
+  console.log(notProcessedOrders);
+  const cancelledOrders = orders.filter((item) => {
+    return item.status == "Cancel";
+  }).length;
+  res.json({ allOrders, deliveredOrders, notProcessedOrders, cancelledOrders });
+});
 router.get("/verified", async (req, res) => {
   const sellers = await Seller.find({ isApproved: true });
   res.json(sellers);
@@ -36,7 +54,7 @@ router.get("/orders", verifySeller, async (req, res) => {
   });
 });
 
-router.put("/order/:id", async (req, res) => {
+router.put("/orders/:id", async (req, res) => {
   const order = await orderModel.findById(req.params.id);
   const { status } = req.body;
   if (!order) {

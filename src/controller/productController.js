@@ -1,5 +1,5 @@
 import Product from "../models/productModel.js";
-import { uploadFiles } from "../helpers/cloudinaryConfig.js";
+import { uploadFiles, deleteImageById } from "../helpers/cloudinaryConfig.js";
 import { v2 as cloudinary } from "cloudinary";
 import Wishlist from "../models/wishlistModel.js";
 import JWT from "jsonwebtoken";
@@ -169,6 +169,36 @@ export const getProductsOfSeller = async (req, res) => {
       message: "Internal Server Error",
     });
   }
+};
+
+export const deleteImage = async (req, res) => {
+  const { pid, imageId } = req.body;
+  if (!imageId || !pid) {
+    return res.status(401).json({
+      success: false,
+      message: "send public key of image in body",
+    });
+  }
+  const prd = await Product.findOne({ _id: pid });
+  prd.images.res.status(200).json({
+    success: true,
+    message: "deleted the image successfully",
+  });
+  // console.log(prd);
+  // deleteImageById(pid)
+  //   .then((val) => {
+  // res.status(200).json({
+  //   success: true,
+  //   message: "deleted the image successfully",
+  //   result: val,
+  // });
+  //   })
+  //   .catch((er) => {
+  //     res.status(500).json({
+  //       success: false,
+  //       message: "Internal Server Error",
+  //     });
+  //   });
 };
 
 export const uploadProduct = async (req, res) => {

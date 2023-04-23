@@ -9,6 +9,16 @@ cloudinary.config({
 
 // Upload
 
+export const deleteImageById = async (id) => {
+  return cloudinary.uploader.destroy(id, function (error, result) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log(result);
+    }
+  });
+};
+
 export const uploadFiles = async (files) => {
   const listOfImages = [];
   for (const file of files) {
