@@ -2,6 +2,7 @@ import express from "express";
 import { verifyAdmin, verifySeller } from "../middleware/authMiddleware.js";
 import Seller from "../models/sellerModel.js";
 import orderModel from "../models/orderModel.js";
+import Product from "../models/productModel.js";
 const router = express.Router();
 router.get("/", verifyAdmin, async (req, res) => {
   const sellers = await Seller.find({ isAdmin: false });
@@ -11,19 +12,28 @@ router.get("/dashboard", verifySeller, async (req, res) => {
   const orders = await orderModel.find({
     seller: req.seller._id,
   });
+  const products = await Product.find({ seller: req.seller._id });
+  const allProducts = products.length;
   const allOrders = orders.length;
-
+  const notProcessedOrders = orders.filter((item) => {
+    console.log(item.status);
+    return item.status === "Not Process";
+  }).length;
   const deliveredOrders = orders.filter((item) => {
     return item.status == "Delivered";
   }).length;
-  const notProcessedOrders = orders.map((item) => {
-    return item.status == "Not Process";
-  }).length;
+
   console.log(notProcessedOrders);
   const cancelledOrders = orders.filter((item) => {
-    return item.status == "Cancel";
+    return item.status == "Canceled";
   }).length;
-  res.json({ allOrders, deliveredOrders, notProcessedOrders, cancelledOrders });
+  res.json({
+    allOrders,
+    deliveredOrders,
+    notProcessedOrders,
+    cancelledOrders,
+    allProducts,
+  });
 });
 router.get("/verified", async (req, res) => {
   const sellers = await Seller.find({ isApproved: true });
@@ -54,6 +64,30 @@ router.get("/orders", verifySeller, async (req, res) => {
   });
 });
 
+router.get("/orders/:id", async (req, res) => {
+  const order = await orderModel
+    .findById(req.params.id)
+    .populate({
+      path: "products",
+      populate: [
+        {
+          path: "product",
+        },
+      ],
+    })
+    .populate("buyer");
+
+  if (!order) {
+    return res.status(401).json({
+      message: "Did not find order",
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    order,
+  });
+});
 router.put("/orders/:id", async (req, res) => {
   const order = await orderModel.findById(req.params.id);
   const { status } = req.body;
@@ -62,7 +96,29 @@ router.put("/orders/:id", async (req, res) => {
       message: "Did not find order",
     });
   }
-  await orderModel.findByIdAndUpdate(req.params.id, { status });
+  const updatedOrder = await orderModel
+    .findByIdAndUpdate(req.params.id, {
+      status,
+    })
+    .populate({
+      path: "products",
+      populate: [
+        {
+          path: "product",
+        },
+      ],
+    })
+    .populate("buyer");
+  if (status != "Canceled") {
+    order.products.forEach((pid) => {
+      Product.findByIdAndUpdate(pid, { $: { countInStock: -1 } });
+    });
+  }
+  res.status(200).json({
+    success: true,
+    message: "Order Status updated successfully",
+    updatedOrder,
+  });
 });
 
 router.get("/:id", verifyAdmin, async (req, res) => {

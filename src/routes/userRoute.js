@@ -20,7 +20,21 @@ router.get("/my-profile", verifyToken, async (req, res) => {
 
 router.get("/orders", verifyToken, async (req, res) => {
   try {
-    const allOrders = await orderModel.find({ buyer: req.user._id });
+    const allOrders = await orderModel
+      .find({ buyer: req.user._id })
+      .populate({
+        path: "products",
+        populate: [
+          {
+            path: "product",
+            populate: [
+              { path: "category", model: "Category" },
+              { path: "seller", model: "Seller" },
+            ],
+          },
+        ],
+      })
+      .populate("seller");
     res.status(200).json({
       success: true,
       orders: allOrders,
