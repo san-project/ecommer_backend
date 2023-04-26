@@ -2,6 +2,20 @@ import { comparePassword, hashPassword } from "../../helpers/authHelper.js";
 import User from "../../models/userModel.js";
 import JWT from "jsonwebtoken";
 import Wishlist from "../../models/wishlistModel.js";
+import nodemailer from "nodemailer";
+import bcrypt from "bcrypt";
+import UserOtpVerificationModel from "../../models/otpVerification.js";
+
+const mailTransporter = nodemailer.createTransport({
+  // host: "smtp.gmail.com",
+  // port: 465,
+  // secure: true,
+  service: "gmail",
+  auth: {
+    user: "buyitnow.san@gmail.com",
+    pass: "nisvxxvotxycvzym",
+  },
+});
 
 export const userRegister = async (req, res) => {
   const { name, email, password } = req.body;
@@ -95,6 +109,84 @@ export const userLogin = async (req, res) => {
         },
       });
     }
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: false, message: "Internal Server Error" });
+  }
+};
+
+export const sendOtpVerifcation = async ({ email, id }) => {
+  try {
+    const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+    const mailOptions = {
+      from: "buyitnow.san@gmail.com",
+      to: email,
+      subject: "Verify your email",
+      html: `<p> Enter <b>${otp}</b> in the app to reset password  </p>`,
+    };
+
+    const saltRounds = 10;
+    const hashedOtp = await bcrypt.hash(otp, saltRounds);
+    const newOtpVerification = await new UserOtpVerificationModel({
+      userId: id,
+      otp: hashedOtp,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 3600000,
+    }).save();
+
+    await mailTransporter.sendMail(mailOptions);
+    return newOtpVerification;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const verifyOtp = async (req, res) => {
+  try {
+    const { verificationId, otp } = req.body;
+    const verification = await UserOtpVerificationModel.findById(
+      verificationId
+    );
+    const compareOtp = await bcrypt.compare(`${otp}`, `${verification.otp}`);
+    console.log(compareOtp);
+    if (!compareOtp) {
+      return res.status(401).json({
+        success: true,
+        message: "otp is incorrect",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "otp is verified",
+      verification,
+      user: verification.userId,
+    });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: false, message: "Internal Server Error" });
+  }
+};
+export const changePassword = async (req, res) => {
+  try {
+    const { userId, password } = req.body;
+    const newHashedPassword = await hashPassword(password);
+    const user = await User.findByIdAndUpdate(userId, {
+      password: newHashedPassword,
+    });
+    const token = JWT.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "30d",
+    });
+    return res.status(200).json({
+      success: true,
+      message: "changed password",
+      user,
+      token,
+    });
   } catch (error) {
     console.log(error);
     return res
