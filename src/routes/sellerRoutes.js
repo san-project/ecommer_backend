@@ -3,6 +3,7 @@ import { verifyAdmin, verifySeller } from "../middleware/authMiddleware.js";
 import Seller from "../models/sellerModel.js";
 import orderModel from "../models/orderModel.js";
 import Product from "../models/productModel.js";
+import Category from "../models/category.js";
 const router = express.Router();
 router.get("/", verifyAdmin, async (req, res) => {
   const sellers = await Seller.find({ isAdmin: false });
@@ -12,8 +13,20 @@ router.get("/dashboard", verifySeller, async (req, res) => {
   const orders = await orderModel.find({
     seller: req.seller._id,
   });
-  const products = await Product.find({ seller: req.seller._id });
+  const products = await Product.find({ seller: req.seller._id }).populate(
+    "category"
+  );
+  const allCategories = await Category.find();
   const allProducts = products.length;
+  let productsMap = {};
+  allCategories.forEach((cat) => {
+    productsMap[cat.category] = 0;
+  });
+  products.forEach((pr) => {
+    console.log(pr.category.category);
+    ++productsMap[pr.category.category];
+  });
+
   const allOrders = orders.length;
   const notProcessedOrders = orders.filter((item) => {
     console.log(item.status);
@@ -33,6 +46,7 @@ router.get("/dashboard", verifySeller, async (req, res) => {
     notProcessedOrders,
     cancelledOrders,
     allProducts,
+    productsMap,
   });
 });
 router.get("/verified", async (req, res) => {
@@ -109,10 +123,12 @@ router.put("/orders/:id", async (req, res) => {
       ],
     })
     .populate("buyer");
-  if (status != "Canceled") {
-    order.products.forEach((pid) => {
-      Product.findByIdAndUpdate(pid, { $: { countInStock: -1 } });
-    });
+  if (status == "Canceled") {
+    for (const pid of order.products) {
+      await Product.findByIdAndUpdate(pid.product, {
+        $inc: { countInStock: 1 },
+      });
+    }
   }
   res.status(200).json({
     success: true,

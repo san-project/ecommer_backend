@@ -291,6 +291,11 @@ export const sendOrder = async (req, res) => {
     });
     await order.save();
     await cartModel.deleteMany({ user: req.user._id });
+    for (const pid of order.products) {
+      await Product.findByIdAndUpdate(pid.product, {
+        $inc: { countInStock: -1 },
+      });
+    }
     res.json({
       order,
     });
